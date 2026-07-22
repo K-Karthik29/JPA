@@ -1,0 +1,251 @@
+package com.spyders.jpa;
+
+import java.util.List;
+import java.util.Scanner;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
+
+public class ProductMain {
+
+    public static void main(String[] args) {
+
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("karthik");
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction et = em.getTransaction();
+
+        Scanner sc = new Scanner(System.in);
+
+        int choice;
+
+        do {
+
+            System.out.println("\n========== PRODUCT CRUD ==========");
+            System.out.println("1. Insert Product");
+            System.out.println("2. Update Product");
+            System.out.println("3. Delete Product");
+            System.out.println("4. Display Product By ID");
+            System.out.println("5. Display All Products");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice : ");
+            choice = sc.nextInt();
+
+            switch (choice) {
+
+            // ================= INSERT =================
+            case 1:
+
+                char insertChoice;
+
+                do {
+
+                    Product p = new Product();
+
+                    System.out.print("Enter Product Id : ");
+                    p.setPid(sc.nextInt());
+
+                    sc.nextLine();
+
+                    System.out.print("Enter Product Name : ");
+                    p.setPname(sc.nextLine());
+
+                    
+                    et.begin();
+                    em.persist(p);
+                    et.commit();
+
+                    System.out.println("Product Inserted Successfully.");
+
+                    System.out.print("Insert another product? (Y/N) : ");
+                    insertChoice = sc.next().charAt(0);
+
+                } while (insertChoice == 'Y' || insertChoice == 'y');
+
+                break;
+
+            // ================= UPDATE =================
+            case 2:
+
+                char updateChoice;
+
+                do {
+
+                    System.out.print("Enter Product Id : ");
+                    int id = sc.nextInt();
+
+                    Product p = em.find(Product.class, id);
+
+                    if (p != null) {
+
+                        sc.nextLine();
+
+                        System.out.print("Enter New Name : ");
+                        p.setPname(sc.nextLine());
+
+                       
+                        et.begin();
+                        em.merge(p);
+                        et.commit();
+
+                        System.out.println("Product Updated Successfully.");
+
+                    } else {
+
+                        System.out.println("Product Not Found.");
+
+                    }
+
+                    System.out.print("Update another product? (Y/N) : ");
+                    updateChoice = sc.next().charAt(0);
+
+                } while (updateChoice == 'Y' || updateChoice == 'y');
+
+                break;
+
+            // ================= DELETE =================
+            case 3:
+
+                char deleteChoice;
+
+                do {
+
+                    System.out.print("Enter Product Id : ");
+                    int id = sc.nextInt();
+
+                    Product p = em.find(Product.class, id);
+
+                    if (p != null) {
+
+                        et.begin();
+                        em.remove(p);
+                        et.commit();
+
+                        System.out.println("Product Deleted Successfully.");
+
+                    } else {
+
+                        System.out.println("Product Not Found.");
+
+                    }
+
+                    System.out.print("Delete another product? (Y/N) : ");
+                    deleteChoice = sc.next().charAt(0);
+
+                } while (deleteChoice == 'Y' || deleteChoice == 'y');
+
+                break;
+
+            // ================= DISPLAY BY ID =================
+            case 4:
+
+                char displayChoice;
+
+                do {
+
+                    System.out.print("Enter Product Id : ");
+                    int id = sc.nextInt();
+
+                    Product p = em.find(Product.class, id);
+
+                    if (p != null) {
+
+                        System.out.println("\nProduct Details");
+                        System.out.println("--------------------------------");
+                        System.out.println("Id    : " + p.getPid());
+                        System.out.println("Name  : " + p.getPname());
+
+                    } else {
+
+                        System.out.println("Product Not Found.");
+
+                    }
+
+                    System.out.print("Search another product? (Y/N) : ");
+                    displayChoice = sc.next().charAt(0);
+
+                } while (displayChoice == 'Y' || displayChoice == 'y');
+
+                break;
+
+            // ================= DISPLAY ALL =================
+            case 5:
+
+                TypedQuery<Product> query =
+                        em.createQuery("FROM Product", Product.class);
+
+                List<Product> list = query.getResultList();
+
+                if (list.isEmpty()) {
+
+                    System.out.println("No Products Found.");
+
+                } else {
+
+                    System.out.println("\n=========== PRODUCT LIST ===========");
+
+                    for (Product p : list) {
+
+                        System.out.println("--------------------------------");
+                        System.out.println("Id    : " + p.getPid());
+                        System.out.println("Name  : " + p.getPname());
+
+                    }
+                }
+
+                break;
+
+            // ================= EXIT =================
+            case 6:
+
+                System.out.println("Thank You...");
+                break;
+
+            default:
+
+                System.out.println("Invalid Choice.");
+
+            }
+
+        } while (choice <= 6);
+
+        sc.close();
+        em.close();
+        emf.close();
+    }
+
+code for the product:
+
+package com.spyders.jpa;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table (name="products")
+public class Product {
+	@Id
+	private int pid;
+	private String pname;
+	public int getPid() {
+		return pid;
+	}
+	public void setPid(int pid) {
+		this.pid = pid;
+	}
+	public String getPname() {
+		return pname;
+	}
+	public void setPname(String pname) {
+		this.pname = pname;
+	}
+	@Override
+	public String toString() {
+		return "product [pid=" + pid + ", pname=" + pname + "]";
+	}
+	
+}
+
+}
